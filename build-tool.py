@@ -8,21 +8,25 @@ __version__ = "0.1.0"
 __license__ = "GPL-3.0"
 
 import argparse
-import platform
 import os
+import platform
+import subprocess
 import zipfile
 
 
 # Location of the rvpkg app on different platforms
 MACOS_RVPKG = "/Applications/RV.app/Contents/MacOS/rvpkg"
-WINDOWS_RVPKG = "C:\Program Files\Shotgun\RV-2021.0.0\bin\rvpkg.exe"
+WINDOWS_RVPKG = "C:\\Program Files\\Shotgun\\RV-2021.0.0\\bin\\rvpkg.exe"
 LINUX_RVPKG = "rvpkg"
 
 # Location of the installation directory on different platforms
 MACOS_PATH_TO_AREA = "~/Library/Application\ Support/RV"
 # TODO: get the home directory with python?
-WINDOWS_PATH_TO_AREA = "C:\\Users\\Gabita\\AppData\\Roaming\\RV\\Packages"
-LINUX_PATH_TO_AREA = "~/.rv/Packages"
+WINDOWS_PATH_TO_AREA = "C:\\Users\\Gabita\\AppData\\Roaming\\RV"
+LINUX_PATH_TO_AREA = "~/.rv/"
+
+# Name of the package harcoded for now
+PACKAGE_NAME = "Metadata Finder"
 
 PLATFORM_NAME = platform.system()
 
@@ -63,37 +67,48 @@ def build():
     except FileExistsError:
         print("Build folder already exists")
 
-    with zipfile.ZipFile("build\\metadata_finder-0.1.0.rvpkg", mode='w') as rvpkg_file:
+    rvpkg_file_path = "build\\metadata_finder-0.1.rvpkg"
+
+    with zipfile.ZipFile(rvpkg_file_path, mode='w') as rvpkg_file:
         zipdir("plugin", rvpkg_file)
 
-    return
+    return rvpkg_file_path
 
 
-def install(rvpkg_file_location):
+def install(rvpkg_file_path):
     """
     Runs the 'rvpkg' program to add and install the current rvpkg file that it's inside the build folder
     It takes into account the current OS to find the correct folders
 
     Args:
-        rvpkg_file_location (str): The location on disk of the rvpkg file to install
+        rvpkg_file_path (str): The location on disk of the rvpkg file to install
 
     Returns:
 
     """
-    return
+    clean_existing_installation()
+
+    process =subprocess.run([WINDOWS_RVPKG, "-install", "-add", WINDOWS_PATH_TO_AREA, rvpkg_file_path],
+                            capture_output=True)
+
+    print(process)
 
 
 def clean_existing_installation():
     """
-    Removes the contents of the 'build' folder and
+    Uninstalls the plugin from RV
     """
+    subprocess.run([WINDOWS_RVPKG, "-remove", "-force", PACKAGE_NAME])
 
 
 def main(args):
     """ Main entry point of the app """
 
     if args.build:
-        build()
+        rvpkg_file_path = build()
+
+    if args.install:
+        install(rvpkg_file_path)
 
 
 if __name__ == "__main__":
