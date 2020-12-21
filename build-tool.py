@@ -25,7 +25,7 @@ MACOS_PATH_TO_AREA = "~/Library/Application\ Support/RV"
 WINDOWS_PATH_TO_AREA = "C:\\Users\\Gabita\\AppData\\Roaming\\RV"
 LINUX_PATH_TO_AREA = "~/.rv/"
 
-# Name of the package harcoded for now
+# Name of the package hardcoded for now
 PACKAGE_NAME = "Metadata Finder"
 
 PLATFORM_NAME = platform.system()
@@ -41,7 +41,7 @@ def get_package_info():
     """
 
 
-def zipdir(path, rvpkg_file):
+def write_rvpkg_file(path, rvpkg_file):
     """
     It grabs all the files inside the path folder and adds them to the zip rvpkg file
 
@@ -70,7 +70,7 @@ def build():
     rvpkg_file_path = "build\\metadata_finder-0.1.rvpkg"
 
     with zipfile.ZipFile(rvpkg_file_path, mode='w') as rvpkg_file:
-        zipdir("plugin", rvpkg_file)
+        write_rvpkg_file("plugin", rvpkg_file)
 
     return rvpkg_file_path
 
@@ -82,13 +82,10 @@ def install(rvpkg_file_path):
 
     Args:
         rvpkg_file_path (str): The location on disk of the rvpkg file to install
-
-    Returns:
-
     """
     clean_existing_installation()
 
-    process =subprocess.run([WINDOWS_RVPKG, "-install", "-add", WINDOWS_PATH_TO_AREA, rvpkg_file_path],
+    process = subprocess.run([WINDOWS_RVPKG, "-install", "-add", WINDOWS_PATH_TO_AREA, rvpkg_file_path],
                             capture_output=True)
 
     print(process)
@@ -101,6 +98,23 @@ def clean_existing_installation():
     subprocess.run([WINDOWS_RVPKG, "-remove", "-force", PACKAGE_NAME])
 
 
+def restart_rv():
+    """
+    Kills all current instances of RV and starts a new one
+    """
+    # TODO: Implement other for other platforms
+    if PLATFORM_NAME == "Windows":
+        subprocess.run(["taskkill", "/F", "/IM", "rv.exe", "/T"])
+        subprocess.run(["start", "RV"], shell=True)
+        print("Signal sent to start RV")
+
+    if PLATFORM_NAME == "Linux":
+        print("Restart on Linux not implemented yet")
+
+    if PLATFORM_NAME == "Darwin":
+        print("Restart on MacOS not implemented yet")
+
+
 def main(args):
     """ Main entry point of the app """
 
@@ -109,6 +123,10 @@ def main(args):
 
     if args.install:
         install(rvpkg_file_path)
+
+    if args.restart:
+        print("Restarting current open RV session")
+        restart_rv()
 
 
 if __name__ == "__main__":
@@ -124,6 +142,12 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="Runs rvpkg -add and -install on the corresponding folder by operating system, "
+                             "defaults to False")
+
+    parser.add_argument("-r", "--restart",
+                        action="store_true",
+                        default=False,
+                        help="Restarts the current open instance of RV in order to get the latest plugin changes"
                              "defaults to False")
 
     parser.add_argument("-t", "--test",
