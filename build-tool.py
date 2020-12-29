@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--restart",
                         action="store_true",
                         default=False,
-                        help="Restarts the current open instance of RV in order to get the latest plugin changes"
+                        help="Restarts the current open instance of RV in order to get the latest plugin changes, "
                              "defaults to False")
 
     parser.add_argument("-t", "--test",
