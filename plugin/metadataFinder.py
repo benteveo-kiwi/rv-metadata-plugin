@@ -10,13 +10,7 @@ class Package_MetadataFinder(rvtypes.MinorMode):
         globalBindings = [("pointer-1--push", self.pointerEvent, "Left mouse button click")]
         localBindings = None
 
-        menu = [
-            ("Example", [
-                    ("Run Example", self.runExample, None, lambda: NeutralMenuState),
-            ])
-        ]
-
-        self.init("Package_MetadataFinder", globalBindings, localBindings, menu)
+        self.init("Package_MetadataFinder", globalBindings, localBindings)
 
     def pointerEvent(self, event):
         """
