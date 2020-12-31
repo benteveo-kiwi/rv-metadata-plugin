@@ -32,6 +32,48 @@ class Package_MetadataFinder(rvtypes.MinorMode):
         # An array of image attribute name/value pairs at the current frame
         imgAttributes = commands.sourceAttributes(sourceName)
         print(imgAttributes)
+        quadrantData = self.obtainQuadrantData(imgAttributes)
+        print(quadrantData)
+
+    def obtainQuadrantData(self, imgAttributes):
+        """
+
+        Args:
+            imgAttributes (list): List of tuples containing the keys and values of the JPEG image attributes.
+                                 It expects the first key to be 'EXIF/Make' and the second to be 'EXIF/Artist',
+                                 where ... is a string with pixel coordinates and 'EXIF/Artist' is a string of
+                                 locations on disk.
+
+        Returns: (list) The quadrant data from the image JPEG attributes as follows:
+                [( coords, location_on_disk ),]
+
+        """
+        coord_string = None
+        location_string = None
+
+        for attrib in imgAttributes:
+            name = attrib[0]
+            value = attrib[1]
+
+            if name == "EXIF/Make":
+                coord_string = value
+            if name == "EXIF/Artist":
+                location_string = value
+
+        if not coord_string or not location_string:
+            print("Unable to obtain the coordinate values, image does not follow metadata format")
+            return
+
+        coords = coord_string.split(';')
+        locations = location_string.split(';')
+
+        quadrants = []
+
+        for coord, location in zip(coords, locations):
+            quadrant = coord, location
+            quadrants.append(quadrant)
+
+        return quadrants
 
     def runExample(self, event):
         print("DEBUG: Metadata Finder Ran.")
