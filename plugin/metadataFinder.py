@@ -15,9 +15,6 @@ class Package_MetadataFinder(rvtypes.MinorMode):
     def pointerEvent(self, event):
         """
         Callback function that uses the pointer position to find the image coordinates.
-        Args:
-            event:
-
         """
 
         pointer = event.pointer()
@@ -27,16 +24,14 @@ class Package_MetadataFinder(rvtypes.MinorMode):
         # Tuple containing the coordinates of the point event with regards to the image,
         # where the lower left corner of the image is (0,0)
         imgPointerCoords = commands.eventToImageSpace(sourceName, pointer)
-        print(imgPointerCoords)
 
         # An array of image attribute name/value pairs at the current frame
         imgAttributes = commands.sourceAttributes(sourceName)
         coords, locations = obtainQuadrantData(imgAttributes)
-        print(coords)
-        print(locations)
-        highest_pixel_value = find_highest_pixel(coords)
 
-        pointer_x, pointer_y = get_pointer_pixel_value(imgPointerCoords, highest_pixel_value)
+        highestPixelValue = findHighestYPixel(coords)
+
+        pointer_x, pointer_y = getPointerPixelValue(imgPointerCoords, highestPixelValue)
 
         found_location = None
 
@@ -48,9 +43,6 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 
         print(found_location)
         QGuiApplication.clipboard().setText(found_location)
-
-    def runExample(self, event):
-        print("DEBUG: Metadata Finder Ran.")
 
 
 def createMode():
@@ -110,7 +102,7 @@ def format_coordinate(coord_string):
     return formatted_coord
 
 
-def find_highest_pixel(coord_list):
+def findHighestYPixel(coord_list):
     """
     Given a list containing pixel coordinate values, returns the highest 'y' value
 
@@ -130,7 +122,7 @@ def find_highest_pixel(coord_list):
     return max(y_list)
 
 
-def get_pointer_pixel_value(imgPointerCoords, pixel_height):
+def getPointerPixelValue(imgPointerCoords, pixelHeight):
     """
     Converts the pointer values from RV into pixel values.
     The pointer data from RV (imgPointerCoords) is a tuple were the lower left corner of the image is (0,0),
@@ -139,17 +131,17 @@ def get_pointer_pixel_value(imgPointerCoords, pixel_height):
 
     Args:
         imgPointerCoords: (tuple) RV pointer location
-        pixel_height: (float) The highest 'y' pixel value
+        pixelHeight: (float) The highest 'y' pixel value
 
     Returns: tuple
 
     """
     pointer_x, pointer_y = imgPointerCoords
-    pixel_x = pixel_height * pointer_x
+    pixel_x = pixelHeight * pointer_x
 
     # Because the RV defines the pointer values from the lower left instead of the upper left corner, we need
     # to invert the 'y' values.
     revert_y_pointer = abs(pointer_y - 1)
-    pixel_y = pixel_height * revert_y_pointer
+    pixel_y = pixelHeight * revert_y_pointer
 
     return pixel_x, pixel_y
