@@ -1,5 +1,5 @@
+from PySide2.QtGui import QGuiApplication
 from rv import commands, rvtypes
-from rv.commands import NeutralMenuState
 
 
 class Package_MetadataFinder(rvtypes.MinorMode):
@@ -31,48 +31,23 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 
         # An array of image attribute name/value pairs at the current frame
         imgAttributes = commands.sourceAttributes(sourceName)
-        quadrantData = self.obtainQuadrantData(imgAttributes)
-        print(quadrantData)
+        coords, locations = obtainQuadrantData(imgAttributes)
+        print(coords)
+        print(locations)
+        highest_pixel_value = find_highest_pixel(coords)
 
-    def obtainQuadrantData(self, imgAttributes):
-        """
+        pointer_x, pointer_y = get_pointer_pixel_value(imgPointerCoords, highest_pixel_value)
 
-        Args:
-            imgAttributes (list): List of tuples containing the keys and values of the JPEG image attributes.
-                                 It expects the first key to be 'EXIF/Make' and the second to be 'EXIF/Artist',
-                                 where ... is a string with pixel coordinates and 'EXIF/Artist' is a string of
-                                 locations on disk.
-
-        Returns: (list) The quadrant data from the image JPEG attributes as follows:
-                [( coords, location_on_disk ),]
-
-        """
-        coord_string = None
-        location_string = None
-
-        for attrib in imgAttributes:
-            name = attrib[0]
-            value = attrib[1]
-
-            if name == "EXIF/Make":
-                coord_string = value
-            if name == "EXIF/Artist":
-                location_string = value
-
-        if not coord_string or not location_string:
-            print("Unable to obtain the coordinate values, image does not follow metadata format")
-            return
-
-        coords = coord_string.split(';')
-        locations = location_string.split(';')
-
-        quadrants = []
+        found_location = None
 
         for coord, location in zip(coords, locations):
-            quadrant = format_coordinates(coord), location
-            quadrants.append(quadrant)
+            lower_corner, upper_corner = coord
+            is_inside = (lower_corner[0] < pointer_x < upper_corner[0]) and (lower_corner[1] < pointer_y < upper_corner[1])
+            if is_inside:
+                found_location = location
 
-        return quadrants
+        print(found_location)
+        QGuiApplication.clipboard().setText(found_location)
 
     def runExample(self, event):
         print("DEBUG: Metadata Finder Ran.")
@@ -82,7 +57,42 @@ def createMode():
     return Package_MetadataFinder()
 
 
-def format_coordinates(coord_string):
+def obtainQuadrantData(imgAttributes):
+    """
+    Looks into the imageAttributes to obtain the coordinates of each image on the contact sheet, and the
+    corresponding locations on disk.
+    It expects to find the coordinates under 'EXIF/Make' and the locations on 'EXIF/Artist', where both
+    are strings. It returns the values in two lists with the correct format.
+
+    Args:
+        imgAttributes (list): List of tuples containing the keys and values of the JPEG image attributes.
+
+    Returns: (tuple) The quadrant data from the image JPEG attributes as follows:
+            ( [coords1, coord2, ], [location_on_disk1, location_on_disk2, ] )
+
+    """
+    coord_string = None
+    location_string = None
+
+    for name, value in imgAttributes:
+        if name == "EXIF/Make":
+            coord_string = value
+        if name == "EXIF/Artist":
+            location_string = value
+
+    if not coord_string or not location_string:
+        print("Unable to obtain the coordinate values, image does not follow metadata format")
+        return
+
+    coords_str = coord_string.split(';')
+    coords = [format_coordinate(coord) for coord in coords_str]
+
+    locations = location_string.split(';')
+
+    return coords, locations
+
+
+def format_coordinate(coord_string):
     """
 
     Args:
