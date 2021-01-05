@@ -98,3 +98,48 @@ def format_coordinates(coord_string):
     formatted_coord = all_coord_list[:2], all_coord_list[2:]
 
     return formatted_coord
+
+
+def find_highest_pixel(coord_list):
+    """
+    Given a list containing pixel coordinate values, returns the highest 'y' value
+
+    Args:
+        coord_list: list of tuples containing the lower and top corner of a quadrant
+                    Eg.: [([0.0, 0.0], [1024.0, 1024.0]), ([1024.0, 0.0], [2048.0, 1024.0]), ]
+
+    Returns: float
+
+    """
+    y_list = []
+
+    for lower_corner, top_corner in coord_list:
+        x, y = top_corner
+        y_list.append(y)
+
+    return max(y_list)
+
+
+def get_pointer_pixel_value(imgPointerCoords, pixel_height):
+    """
+    Converts the pointer values from RV into pixel values.
+    The pointer data from RV (imgPointerCoords) is a tuple were the lower left corner of the image is (0,0),
+    the height of the image is 1 and the width varies depending on the image aspect.
+    Knowing the highest pixel value allows us to define the '1' ratio.
+
+    Args:
+        imgPointerCoords: (tuple) RV pointer location
+        pixel_height: (float) The highest 'y' pixel value
+
+    Returns: tuple
+
+    """
+    pointer_x, pointer_y = imgPointerCoords
+    pixel_x = pixel_height * pointer_x
+
+    # Because the RV defines the pointer values from the lower left instead of the upper left corner, we need
+    # to invert the 'y' values.
+    revert_y_pointer = abs(pointer_y - 1)
+    pixel_y = pixel_height * revert_y_pointer
+
+    return pixel_x, pixel_y
