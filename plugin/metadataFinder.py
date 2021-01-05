@@ -31,7 +31,6 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 
         # An array of image attribute name/value pairs at the current frame
         imgAttributes = commands.sourceAttributes(sourceName)
-        print(imgAttributes)
         quadrantData = self.obtainQuadrantData(imgAttributes)
         print(quadrantData)
 
