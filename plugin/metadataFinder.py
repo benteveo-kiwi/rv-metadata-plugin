@@ -69,7 +69,7 @@ class Package_MetadataFinder(rvtypes.MinorMode):
         quadrants = []
 
         for coord, location in zip(coords, locations):
-            quadrant = coord, location
+            quadrant = format_coordinates(coord), location
             quadrants.append(quadrant)
 
         return quadrants
@@ -81,3 +81,20 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 def createMode():
     return Package_MetadataFinder()
 
+
+def format_coordinates(coord_string):
+    """
+
+    Args:
+        coord_string: The pixel coordinates as a string. Eg.: '0,0,1024,1024'
+
+    Returns: a tuple where the first element are two floats that represent the x axis and the second
+             element are two floats that represent the y axis. Eg.: ([0.0, 0.0], [1024.0, 1024.0])
+
+    """
+
+    all_coord_list = coord_string.split(",")
+    all_coord_list = [float(i) for i in all_coord_list]
+    formatted_coord = all_coord_list[:2], all_coord_list[2:]
+
+    return formatted_coord
