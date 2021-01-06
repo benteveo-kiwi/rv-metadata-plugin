@@ -14,7 +14,8 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 
     def pointerEvent(self, event):
         """
-        Callback function that uses the pointer position to find the image coordinates.
+        Callback function that uses the pointer position to find the image coordinates and puts it
+        in the system clipboard
         """
 
         pointer = event.pointer()
@@ -83,12 +84,13 @@ def obtainQuadrantData(imgAttributes):
 
 def format_coordinate(coord_string):
     """
+    This function converts a string with two coordinate values into a tuple of float coordinate values
 
     Args:
-        coord_string: The pixel coordinates as a string. Eg.: '0,0,1024,1024'
+        coord_string: (str) The pixel coordinates. Eg.: '0,0,1024,1024'
 
-    Returns: a tuple where the first element are two floats that represent the x axis and the second
-             element are two floats that represent the y axis. Eg.: ([0.0, 0.0], [1024.0, 1024.0])
+    Returns: (tuple) a tuple where the first element represents the x axis and the second
+             element represents the y axis. Eg.: ([0.0, 0.0], [1024.0, 1024.0])
 
     """
 
@@ -161,8 +163,8 @@ def matchPointerToLocation(coords, locations, pointerPixelCoords):
     pointer_x, pointer_y = pointerPixelCoords
 
     for coord, location in zip(coords, locations):
-        lower_corner, upper_corner = coord
-        is_inside = (lower_corner[0] < pointer_x < upper_corner[0]) and (lower_corner[1] < pointer_y < upper_corner[1])
+        lower_corner, top_corner = coord
+        is_inside = (lower_corner[0] < pointer_x < top_corner[0]) and (lower_corner[1] < pointer_y < top_corner[1])
         if is_inside:
             found_location = location
 
