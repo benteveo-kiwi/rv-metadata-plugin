@@ -1,0 +1,19 @@
+package: Metadata Finder
+author: Gabriela Roque Lopez
+organization: Benteveo
+contact: development@benteveo.kiwi
+version: 1.0
+requires: ''
+rv: 2021.0.0
+
+modes:
+- file: metadataFinder.py
+  load: immediate
+
+description: |
+  <p>
+  This plugin allows the user to find metadata in a JPEG image and copy it to the clipboard.
+  It was made to pick up information injected into the JPEG metadata where "MAKE" has a list with
+  the coordinates of the images in the contact sheet and "ARTIST" has a list of locations on disk
+  for each.
+  </p>
