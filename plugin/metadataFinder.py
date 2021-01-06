@@ -7,7 +7,7 @@ class Package_MetadataFinder(rvtypes.MinorMode):
     def __init__(self):
         rvtypes.MinorMode.__init__(self)
 
-        globalBindings = [("pointer-1--push", self.pointerEvent, "Left mouse button click")]
+        globalBindings = [("pointer-2--push", self.pointerEvent, "Middle mouse button click")]
         localBindings = None
 
         self.init("Package_MetadataFinder", globalBindings, localBindings)
