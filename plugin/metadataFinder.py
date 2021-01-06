@@ -2,6 +2,10 @@ from PySide2.QtGui import QGuiApplication
 from rv import commands, rvtypes
 
 
+METADATA_KEY_COORDINATES = "EXIF/Make"
+METADATA_KEY_LOCATIONS = "EXIF/Artist"
+
+
 class Package_MetadataFinder(rvtypes.MinorMode):
 
     def __init__(self):
@@ -55,8 +59,7 @@ def obtainQuadrantData(imgAttributes):
     """
     Looks into the imageAttributes to obtain the coordinates of each image on the contact sheet, and the
     corresponding locations on disk.
-    It expects to find the coordinates under 'EXIF/Make' and the locations on 'EXIF/Artist', where both
-    are strings. It returns the values in two lists with the correct format.
+    It returns the values in two lists with the correct format.
 
     Args:
         imgAttributes (list): List of tuples containing the keys and values of the JPEG image attributes.
@@ -68,10 +71,10 @@ def obtainQuadrantData(imgAttributes):
     coord_string = None
     location_string = None
 
-    for name, value in imgAttributes:
-        if name == "EXIF/Make":
+    for key, value in imgAttributes:
+        if key == METADATA_KEY_COORDINATES:
             coord_string = value
-        if name == "EXIF/Artist":
+        if key == METADATA_KEY_LOCATIONS:
             location_string = value
 
     if not coord_string or not location_string:
