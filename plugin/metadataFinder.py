@@ -29,19 +29,16 @@ class Package_MetadataFinder(rvtypes.MinorMode):
         imgAttributes = commands.sourceAttributes(sourceName)
         coords, locations = obtainQuadrantData(imgAttributes)
 
+        # We need to find the pixel value of the image height
         highestPixelValue = findHighestYPixel(coords)
 
-        pointer_x, pointer_y = getPointerPixelValue(imgPointerCoords, highestPixelValue)
+        # We then convert the RV pointer data to pixels
+        pointerPixelCoords = getPointerPixelValue(imgPointerCoords, highestPixelValue)
 
-        found_location = None
-
-        for coord, location in zip(coords, locations):
-            lower_corner, upper_corner = coord
-            is_inside = (lower_corner[0] < pointer_x < upper_corner[0]) and (lower_corner[1] < pointer_y < upper_corner[1])
-            if is_inside:
-                found_location = location
-
+        found_location = matchPointerToLocation(coords, locations, pointerPixelCoords)
         print(found_location)
+
+        # Copy the matched location to the clipboard
         QGuiApplication.clipboard().setText(found_location)
 
 
@@ -145,3 +142,28 @@ def getPointerPixelValue(imgPointerCoords, pixelHeight):
     pixel_y = pixelHeight * revert_y_pointer
 
     return pixel_x, pixel_y
+
+
+def matchPointerToLocation(coords, locations, pointerPixelCoords):
+    """
+    This function matches the pointer position to a image quadrant and it returns the corresponding
+    location string from the locations list
+
+    Args:
+        coords: (list) All the quadrants coordinates of the images in pixels
+        locations: (list) Strings with the locations on disk of the contact sheet images
+        pointerPixelCoords: (tuple) The pointer coordinates converted to pixels
+
+    Returns: (str)
+
+    """
+    found_location = None
+    pointer_x, pointer_y = pointerPixelCoords
+
+    for coord, location in zip(coords, locations):
+        lower_corner, upper_corner = coord
+        is_inside = (lower_corner[0] < pointer_x < upper_corner[0]) and (lower_corner[1] < pointer_y < upper_corner[1])
+        if is_inside:
+            found_location = location
+
+    return found_location
