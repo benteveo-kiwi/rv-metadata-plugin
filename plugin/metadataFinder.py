@@ -28,7 +28,11 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 
         # An array of image attribute name/value pairs at the current frame
         imgAttributes = commands.sourceAttributes(sourceName)
-        coords, locations = obtainQuadrantData(imgAttributes)
+
+        try:
+            coords, locations = obtainQuadrantData(imgAttributes)
+        except TypeError:
+            return
 
         # We need to find the pixel value of the image height
         highestPixelValue = findHighestYPixel(coords)
