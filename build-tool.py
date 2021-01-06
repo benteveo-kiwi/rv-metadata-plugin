@@ -4,7 +4,7 @@ This is a script to assist with RV's package development in order to iterate and
 """
 
 __author__ = "Gabriela Roque Lopez"
-__version__ = "0.1.0"
+__version__ = "0.0.1"
 __license__ = "GPL-3.0"
 
 import argparse
