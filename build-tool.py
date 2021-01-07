@@ -15,7 +15,9 @@ import os
 import platform
 import subprocess
 import zipfile
+from pathlib import Path
 
+PLATFORM_NAME = platform.system()
 
 # Location of the rvpkg app on different platforms
 MACOS_RVPKG = "/Applications/RV.app/Contents/MacOS/rvpkg"
@@ -24,14 +26,26 @@ LINUX_RVPKG = "rvpkg"
 
 # Location of the installation directory on different platforms
 MACOS_PATH_TO_AREA = "~/Library/Application\ Support/RV"
-# TODO: get the home directory with python?
-WINDOWS_PATH_TO_AREA = "C:\\Users\\Gabita\\AppData\\Roaming\\RV"
+WINDOWS_PATH_TO_AREA = "{}\\AppData\\Roaming\\RV"
 LINUX_PATH_TO_AREA = "~/.rv/"
 
-# Name of the package hardcoded for now
+# Name and version of the package hardcoded for now
 PACKAGE_NAME = "Metadata Finder"
+PACKAGE_VERSION = 1.0
+PACKAGE_FILENAME = "{}-{}.rvpkg".format(PACKAGE_NAME.lower().replace(" ", "_"), PACKAGE_VERSION)
 
-PLATFORM_NAME = platform.system()
+if PLATFORM_NAME == "Windows":
+    RVPKG = WINDOWS_RVPKG
+    PATH_TO_AREA = WINDOWS_PATH_TO_AREA.format(str(Path.home()))
+    PACKAGED_FILEPATH = "build\\{}".format(PACKAGE_FILENAME)
+elif PLATFORM_NAME == "Linux":
+    RVPKG = LINUX_RVPKG
+    PATH_TO_AREA = LINUX_PATH_TO_AREA
+    PACKAGED_FILEPATH = "build/{}".format(PACKAGE_FILENAME)
+elif PLATFORM_NAME == "Darwin":
+    RVPKG = MACOS_RVPKG
+    PATH_TO_AREA = MACOS_PATH_TO_AREA
+    PACKAGED_FILEPATH = "build/{}".format(PACKAGE_FILENAME)
 
 
 def get_package_info():
@@ -61,34 +75,24 @@ def write_rvpkg_file(path, rvpkg_file):
 def build():
     """
     Creates a 'build' folder and packages the script files into a zip .rvpkg file
-
-    Returns:
-        string: The packaged file location on disk as a string
     """
     try:
         os.mkdir("build")
     except FileExistsError:
         print("Build folder already exists")
 
-    rvpkg_file_path = "build\\metadata_finder-0.1.rvpkg"
-
-    with zipfile.ZipFile(rvpkg_file_path, mode='w') as rvpkg_file:
+    with zipfile.ZipFile(PACKAGED_FILEPATH, mode='w') as rvpkg_file:
         write_rvpkg_file("plugin", rvpkg_file)
 
-    return rvpkg_file_path
 
-
-def install(rvpkg_file_path):
+def install():
     """
     Runs the 'rvpkg' program to add and install the current rvpkg file that it's inside the build folder
     It takes into account the current OS to find the correct folders
-
-    Args:
-        rvpkg_file_path (str): The location on disk of the rvpkg file to install
     """
     clean_existing_installation()
 
-    process = subprocess.run([WINDOWS_RVPKG, "-install", "-add", WINDOWS_PATH_TO_AREA, rvpkg_file_path],
+    process = subprocess.run([RVPKG, "-install", "-add", PATH_TO_AREA, PACKAGED_FILEPATH],
                             capture_output=True)
 
     print(process)
@@ -98,7 +102,7 @@ def clean_existing_installation():
     """
     Uninstalls the plugin from RV
     """
-    subprocess.run([WINDOWS_RVPKG, "-remove", "-force", PACKAGE_NAME])
+    subprocess.run([RVPKG, "-remove", "-force", PACKAGE_NAME])
 
 
 def restart_rv():
@@ -122,10 +126,10 @@ def main(args):
     """ Main entry point of the app """
 
     if args.build:
-        rvpkg_file_path = build()
+        build()
 
     if args.install:
-        install(rvpkg_file_path)
+        install()
 
     if args.restart:
         print("Restarting current open RV session")
