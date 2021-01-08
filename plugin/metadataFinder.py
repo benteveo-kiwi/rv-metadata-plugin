@@ -1,5 +1,5 @@
 from PySide2.QtGui import QGuiApplication
-from rv import commands, rvtypes
+from rv import commands, extra_commands, rvtypes
 
 
 METADATA_KEY_COORDINATES = "EXIF/Make"
@@ -25,7 +25,7 @@ class Package_MetadataFinder(rvtypes.MinorMode):
         pointer = event.pointer()
         # The name of the image in the sequence for rv
         sourceName = commands.sourceAtPixel(pointer)[0]['name']
-
+        
         # Tuple containing the coordinates of the point event with regards to the image,
         # where the lower left corner of the image is (0,0)
         imgPointerCoords = commands.eventToImageSpace(sourceName, pointer)
@@ -49,7 +49,8 @@ class Package_MetadataFinder(rvtypes.MinorMode):
 
         # Copy the matched location to the clipboard
         QGuiApplication.clipboard().setText(found_location)
-
+        # Display the copied data
+        extra_commands.displayFeedback2("Copied to clipboard: {}".format(found_location), 2.0)
 
 def createMode():
     return Package_MetadataFinder()
