@@ -34,3 +34,9 @@ of the mouse pointer and matches it to the location on disk copying to the clipb
 * Tested with RV-2021.0.0
 * Uses Pyside2 to copy the data to the clipboard
 * Plugin runs in Windows, Mac and Linux
+
+
+----------------------------------------------------------------------------
+_Copyright 2020 Benteveo Ltd._
+
+_Licensed under the GNU General Public License v3.0_
