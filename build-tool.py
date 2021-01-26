@@ -29,9 +29,32 @@ MACOS_PATH_TO_AREA = "~/Library/Application\ Support/RV"
 WINDOWS_PATH_TO_AREA = "{}\\AppData\\Roaming\\RV"
 LINUX_PATH_TO_AREA = "~/.rv/"
 
-# Name and version of the package hardcoded for now
-PACKAGE_NAME = "Metadata Finder"
-PACKAGE_VERSION = 1.0
+
+def get_package_info():
+    """
+    Looks up the Package name and Version from the plugin PACKAGE file
+    This is done manually to avoid having to install the pyyaml dependency
+    Assumes the PACKAGE file is inside the 'plugin' folder
+
+    Returns:
+        tuple (str, float): The name and latest version of this plugin
+
+    """
+    package_filename = os.path.join('plugin', 'PACKAGE')
+
+    name = ""
+    version = 0.1
+    with open(package_filename) as file:
+        for line in file:
+            element = line.strip().split(':')
+            if element[0] == 'package':
+                name = element[1].strip()
+            elif element[0] == 'version':
+                version = element[1].strip()
+
+    return name, version
+
+PACKAGE_NAME, PACKAGE_VERSION = get_package_info()
 PACKAGE_FILENAME = "{}-{}.rvpkg".format(PACKAGE_NAME.lower().replace(" ", "_"), PACKAGE_VERSION)
 
 if PLATFORM_NAME == "Windows":
@@ -46,16 +69,6 @@ elif PLATFORM_NAME == "Darwin":
     RVPKG = MACOS_RVPKG
     PATH_TO_AREA = MACOS_PATH_TO_AREA
     PACKAGED_FILEPATH = "build/{}".format(PACKAGE_FILENAME)
-
-
-def get_package_info():
-    """
-    Looks up the Package name and Version from the plugin PACKAGE file
-
-    Returns:
-        tuple (str, float): The name and latest version of this plugin
-
-    """
 
 
 def write_rvpkg_file(path, rvpkg_file):
